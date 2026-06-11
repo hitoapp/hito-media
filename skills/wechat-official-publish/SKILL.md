@@ -179,14 +179,16 @@ git -C .tmp/hito-mp diff --name-only <上个版本>..<目标版本>
 生成内容时，按平台保存到当前媒体仓库：
 
 ```text
-publish/公众号/YYYY-MM-DD-主题/
+publish/official-account/YYYY-MM-DD-主题/
 ```
 
 日期使用当前日期。主题使用简短中文短语，例如：
 
 ```text
-publish/公众号/2026-06-11-活动分享统计优化/
+publish/official-account/2026-06-11-活动分享统计优化/
 ```
+
+平台目录固定使用英文 `publish/official-account/`，减少后续后台上传素材时本地文件选择器对中文路径兼容不稳定的问题。
 
 建议保存：
 

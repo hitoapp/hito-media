@@ -7,8 +7,8 @@
 ```text
 hito-media/
 ├── publish/
-│   ├── 小红书/
-│   └── 公众号/
+│   ├── xiaohongshu/
+│   └── official-account/
 ├── docs/
 │   └── hito-mp-versions.md
 ├── skills/
@@ -19,26 +19,28 @@ hito-media/
 └── .tmp/
 ```
 
-- `publish/小红书/`：存放小红书发布内容。
-- `publish/公众号/`：存放微信公众号发布内容。
+- `publish/xiaohongshu/`：存放小红书发布内容。
+- `publish/official-account/`：存放微信公众号发布内容。
 - `docs/hito-mp-versions.md`：记录关联 `hito-mp` 仓库的有效版本索引。
 - `skills/`：存放本仓库维护的 Codex skill。
 - `.tmp/`：临时工作目录，用于拉取关联代码仓库，不提交到 Git。
+
+平台目录使用英文命名，主要是为了减少网页上传素材时 macOS 文件选择器对中文路径的兼容问题。
 
 ## 发布内容存放规则
 
 每次生成小红书或公众号内容时，在对应平台目录下新建一个文件夹：
 
 ```text
-publish/小红书/YYYY-MM-DD-主题/
-publish/公众号/YYYY-MM-DD-主题/
+publish/xiaohongshu/YYYY-MM-DD-主题/
+publish/official-account/YYYY-MM-DD-主题/
 ```
 
 示例：
 
 ```text
-publish/小红书/2026-06-11-接入方管理升级/
-publish/公众号/2026-06-11-活动分享统计优化/
+publish/xiaohongshu/2026-06-11-接入方管理升级/
+publish/official-account/2026-06-11-活动分享统计优化/
 ```
 
 建议每个发布文件夹内至少包含：
