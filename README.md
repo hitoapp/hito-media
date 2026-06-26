@@ -16,6 +16,7 @@ hito-media/
 │   │   └── SKILL.md
 │   └── wechat-official-publish/
 │       └── SKILL.md
+├── AGENTS.md
 └── .tmp/
 ```
 
@@ -23,6 +24,7 @@ hito-media/
 - `publish/official-account/`：存放微信公众号发布内容。
 - `docs/hito-mp-versions.md`：记录关联 `hito-mp` 仓库的有效版本索引。
 - `skills/`：存放本仓库维护的 Codex skill。
+- `AGENTS.md`：项目级执行规范，包含关联代码仓库、版本分析和候选清单流程。
 - `.tmp/`：临时工作目录，用于拉取关联代码仓库，不提交到 Git。
 
 平台目录使用英文命名，主要是为了减少网页上传素材时 macOS 文件选择器对中文路径的兼容问题。
@@ -50,11 +52,11 @@ publish/official-account/2026-06-11-活动分享统计优化/
 - `生成配图/`：用于发布的封面图、正文图、产品截图或拼图。
 - `发布记录.md`：发布平台、发布时间、链接和后续数据复盘。
 
-正式写入文件前，应先在对话中确认标题、正文、配图方向和是否发布。发布到对应平台后，需要把确认后的内容和素材提交并推送到本 Git 仓库。
+正式写入文件前，应先在对话中确认标题、正文、配图方向和是否发布。发布后如需归档，记录最终链接、发布时间和后续复盘数据。
 
 ## 关联代码仓库
 
-生成文案前需要分析喜多小程序代码仓库：
+当用户要求“基于最近改动”“基于某个版本”“看看 hito-mp 最近更新”来生成发布内容时，需要先按项目级流程分析喜多小程序代码仓库：
 
 ```text
 git@github.com:hitoapp/hito-mp.git
@@ -66,15 +68,36 @@ git@github.com:hitoapp/hito-mp.git
 .tmp/hito-mp
 ```
 
-`.tmp/` 已加入 `.gitignore`，不会提交到本仓库。每次生成小红书或公众号内容前，都应先检查 `.tmp/hito-mp` 是否存在，并执行：
+`.tmp/` 已加入 `.gitignore`，不会提交到本仓库。
+
+如果 `.tmp/hito-mp` 不存在，先克隆：
+
+```sh
+mkdir -p .tmp
+git clone git@github.com:hitoapp/hito-mp.git .tmp/hito-mp
+```
+
+如果 `.tmp/hito-mp` 已存在，先更新：
 
 ```sh
 git -C .tmp/hito-mp pull --ff-only
 ```
 
-然后通过 `git tag -n` 和版本间 diff 分析最近产品改动，把技术提交转译成适合宣传喜多产品价值的内容。
+然后列出有效 tag，并通过版本间 diff 分析最近产品改动：
 
-每次拉取关联仓库后，应同步更新 `docs/hito-mp-versions.md`，方便后续查阅版本历史。
+```sh
+git -C .tmp/hito-mp tag -n
+git -C .tmp/hito-mp for-each-ref --sort=-creatordate --format='%(refname:short)|%(creatordate:short)|%(subject)|%(objectname:short)' refs/tags
+git -C .tmp/hito-mp log --oneline <上个版本>..<目标版本>
+git -C .tmp/hito-mp diff --stat <上个版本>..<目标版本>
+git -C .tmp/hito-mp diff --name-only <上个版本>..<目标版本>
+```
+
+忽略没有 `v` 前缀、但语义上与 `v` 版本重复的 tag。例如 `1.9.4` 与 `v1.9.4` 同时存在时，只保留 `v1.9.4`。
+
+每次拉取关联仓库后，应同步更新 `docs/hito-mp-versions.md`，方便后续查阅版本历史。版本分析完成后，先输出“可宣传改动候选清单”，让用户确认主题、平台和内容重点，再进入小红书或公众号 skill。
+
+更完整的执行规范见 `AGENTS.md`。
 
 ## 安装 skill
 
@@ -100,6 +123,6 @@ cp -R skills/wechat-official-publish ~/.codex/skills/
 基于 hito-mp 最近版本改动，帮我生成一篇喜多公众号产品公告
 ```
 
-如果需要实际发布到小红书，skill 会使用用户本机 Chrome 登录态和 Computer Use 操作小红书创作服务平台。发布前应先确认文案和图片，明确要求发布后才点击发布。
+小红书 skill 只生成或整理手动发布所需素材，不自动操作小红书后台。
 
-公众号 skill 当前先用于文章生成、保存和 Git 归档。公众号后台自动发布流程后续再按实际后台登录态和发布方式补充。
+公众号 skill 当前用于喜多产品更新类文章生成、摘要整理、配图建议和素材保存；平台发布由用户后续手动完成。
