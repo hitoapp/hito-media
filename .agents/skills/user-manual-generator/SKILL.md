@@ -1,6 +1,6 @@
 ---
 name: user-manual-generator
-description: 根据前后端代码库，为某个功能自动生成用户手册。使用 codegraph CLI 分析前端页面和数据模型，追踪后端 API 和业务逻辑，最终输出结构化的 .md 文档，支持 LangChain 检索增强生成（RAG）分块（chunking）后向量化落库。适用于"生成用户手册""写功能说明文档""为 XX 功能写操作指南"等请求。
+description: 根据前后端代码库，为某个功能自动生成用户手册，支持 LangChain 检索增强生成（RAG）分块（chunking）后向量化落库。适用于“生成用户手册”、“写功能说明文档”、“为 XX 功能写操作指南”等请求。
 ---
 
 # user-manual-generator
@@ -11,7 +11,7 @@ description: 根据前后端代码库，为某个功能自动生成用户手册�
 
 ## 强制约束
 
-- 必须完整分析前后端相关代码后，才能开始编写用户手册。
+- 必须通过 `hito-codebase-reader` skill 完整分析前后端相关代码后，才能开始编写用户手册。
 - 生成的文档必须遵循固定的三章节结构（概述、核心概念、操作指南），其中操作指南按功能场景拆分为多个自包含的 `###` 小节（见下方"文档结构"）。
 - 文档保存到项目根目录的 `manual/` 目录下。
 - 不要编造代码中不存在的功能。所有描述必须有代码依据。
@@ -33,88 +33,26 @@ description: 根据前后端代码库，为某个功能自动生成用户手册�
 | CO | 群组主理人 | 群组拥有者，对群组拥有完整管理权限 |
 | CA | 群组管理员 | 群组管理员，拥有群组内部分管理权限 |
 
-#### 第二步：读取代码库的方式
+#### 第二步：阅读前端代码
 
-从项目根目录 `.env` 文件中读取代码库路径:
-
-```sh
-cat .env
-```
-
-必须包含以下两个变量:
-
-| 变量 | 说明 |
-|------|------|
-| `HITO_MP_DIR` | 前端小程序代码库路径 |
-| `HITO_DIR` | 后端 Java/Kotlin 代码库路径 |
-
-如果 `.env` 文件不存在或变量缺失，提示用户配置后再继续。
-
-成功读取代码库路径后，通过 `codegraph-cli` skill 阅读代码。
-
-#### 第三步：前端代码分析
-
-##### 3.1 搜索前端页面
-
-按以下优先级定位前端相关代码:
-
-1. **codegraph（优先）**：用于搜索函数名、类名、变量名等代码符号。
-2. **rg（补充）**：当需要搜索中文文案、UI 提示文本等 codegraph 无法覆盖的硬编码字符串时使用。
-
-```sh
-# 【优先】通过 codegraph 搜索代码符号（函数名、类名等）
-codegraph query "<关键词>" --path $HITO_MP_DIR -l 20 -j
-
-# 【补充】通过 rg 搜索中文文案或硬编码字符串
-rg -il "<中文关键词>" $HITO_MP_DIR/src --include '*.vue' --include '*.ts' --include '*.mpx' --include '*.js'
-
-# 列出前端文件结构
-codegraph files --path $HITO_MP_DIR
-```
-
-##### 3.2 读取前端页面文件
-
-找到相关页面后，读取每个页面的文件。关注:
+通过 `hito-codebase-reader` skill 阅读前端相关代码，读取每个页面的文件，理解前端页面布局和操作流程，重点关注:
 
 - 页面标题和导航栏文案 → 用于确定功能在 UI 中的名称
 - 数据加载逻辑(onLoad / fetchData 等方法) → 用于了解功能的输入条件和加载流程
 - 用户交互方法(tap、submit 等) → 用于编写操作步骤
 - 条件分支(if/else、disabled、角色判断) → 用于编写权限和约束说明
 - 提示文案(toast、modal、empty state) → 用于了解边界情况和错误提示
+- 后端API接口信息（路径、request method） → 用于理解后端业务逻辑
 
-##### 3.3 提取 API 调用
+#### 第三步：阅读后端代码
 
-从前端 API 文件(如 `caApi.ts`、`coApi.ts` 等)中提取与功能相关的 API 调用，记录:
+通过 `hito-codebase-reader` skill 阅读前端调用的后端 Controller 接口，并沿调用链路向下深挖，理解后端业务逻辑和数据查询方式，重点关注：
 
-- API 路径(如 `/ca/cmd/event/create`)
-- HTTP 方法(GET/POST/DELETE)
-- 请求参数和响应类型
-- API 所属角色命名空间(CA / CO / Mine 等)
-
-#### 第四步：后端代码分析
-
-##### 4.1 定位后端 Controller
-
-根据前端 API 路径，在后端代码中搜索对应的 Controller，读取 Controller 文件，确认每个 API 端点的:
-
-- 完整路径和 HTTP 方法
-- 请求体 / 查询参数
-- 鉴权注解(`@ServiceResource`)
-- 调用的 CommandHandler 或 Querier
-
-##### 4.2 读取 Command / Query 处理层
-
-读取 CommandHandler 文件，分析业务逻辑:
-
-- **权限校验**:`horizonAuth.assertCrowdOwner` / `assertCrowdAdmin` → 确定哪些角色可以执行操作
-- **业务校验**:名称唯一性检查、数量上限检查、状态校验 → 确定业务约束
-- **领域对象操作**:创建、修改、删除的实体字段 → 确定功能的数据流
-
-读取 Querier 文件，分析查询逻辑:
-
-- 数据聚合方式
-- 分页机制
-- 过滤条件
+- 接口定义：请求路径、HTTP 方法、入参（Body/Query）以及鉴权注解（如 @ServiceResource）。
+- 权限与校验：允许操作的角色（如 assertCrowdOwner/Admin）和业务约束（如名称唯一、数量上限、状态流转）。
+- 核心业务处理：
+  - 写操作：进行了那些校验，抛出了哪些异常，以及最终修改、创建或删除了哪些对象的哪些字段。
+  - 读操作：查询的过滤条件、分页机制以及数据的聚合/组装方式。
 
 ### 第二阶段：根据代码中呈现的业务逻辑，编写用户手册
 
