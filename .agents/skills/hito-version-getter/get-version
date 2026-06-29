@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+# 读取喜多前后端版本号
+# 用法: get-version [fe|be]
+#   fe  仅输出前端版本号字符串
+#   be  仅输出后端版本号字符串
+#   (无参数) 输出全部版本信息
+# 依赖：项目根目录 .env 文件中需配置 HITO_MP_DIR 和 HITO_DIR
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+PROJECT_ROOT="$SCRIPT_DIR"
+while [[ ! -f "$PROJECT_ROOT/.env" && "$PROJECT_ROOT" != "/" ]]; do
+  PROJECT_ROOT="$(dirname "$PROJECT_ROOT")"
+done
+
+die() { echo "$@" >&2; exit 1; }
+
+[[ -f "$PROJECT_ROOT/.env" ]] || die "❌ 未找到 .env 文件"
+source "$PROJECT_ROOT/.env"
+[[ -n "${HITO_MP_DIR:-}" ]] || die "❌ .env 中未配置 HITO_MP_DIR"
+[[ -n "${HITO_DIR:-}" ]] || die "❌ .env 中未配置 HITO_DIR"
+
+get_frontend_version() {
+  local cfg="$HITO_MP_DIR/src/config.ts"
+  [[ -f "$cfg" ]] || die "❌ 前端配置文件不存在: $cfg"
+  grep "appVersion:" "$cfg" | head -1 | sed -n "s/.*appVersion:[[:space:]]*'\([^']*\)'.*/\1/p"
+}
+
+get_backend_version() {
+  local cfg="$HITO_DIR/gradle.properties"
+  [[ -f "$cfg" ]] || die "❌ 后端配置文件不存在: $cfg"
+  grep "^hitoAppVersion=" "$cfg" | cut -d'=' -f2
+}
+
+case "${1:-}" in
+  fe)
+    get_frontend_version
+    ;;
+  be)
+    get_backend_version
+    ;;
+  *)
+    echo "前端: $(get_frontend_version)"
+    echo "后端: $(get_backend_version)"
+    ;;
+esac
