@@ -87,14 +87,35 @@ description: 根据前后端代码库，为某个功能自动生成用户手册�
 3. **权限一致性检查**：角色权限表格中每个角色的权限声明是否与后端 `horizonAuth.assert*` 鉴权逻辑一致？
 4. **路径表述检查**：操作步骤中的导航路径是否使用产品语言（如"社区首页 → 选择群组"），而非页面文件路径？
 5. **完整性检查**：是否覆盖了前端条件分支中的所有角色视角（GA / TA / CO / CA）和边界状态（空数据、加载中、错误）？
+6. **Front Matter 检查**：文档顶部是否包含 YAML front matter？`title`、`description`、`module`、`tags`、`updated_at`、`version` 六个字段是否完整且与正文内容一致？
 
 发现不符合项时，回到对应代码补充分析后修正，不要直接发布。
 
 ## 文档结构
 
-用户手册必须遵循以下结构。每个 `###` 标题是一个自包含的 RAG chunk 单元，权限、约束、异常处理分散在对应的操作场景内:
+用户手册必须遵循以下结构。每个 `###` 标题是一个自包含的 RAG chunk 单元，权限、约束、异常处理分散在对应的操作场景内。
+
+### Front Matter
+
+每份文档顶部必须包含 YAML front matter，用于向量化落库时的元数据索引和检索增强。字段说明：
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| `title` | string | 功能中文名，与正文一级标题一致 |
+| `version_fe` | string | 对应的前端版本号 |
+| `version_be` | string | 对应的后端版本号 |
+| `updated_at` | string | 文档生成/更新日期，格式 YYYY-MM-DD |
 
 ```markdown
+---
+title: {功能中文名}
+version_fe: {前端版本号}
+version_be: {后端版本号}
+updated_at: {YYYY-MM-DD hh:mm:ss}
+---
+
+其中前后端版本号必须通过 `hito-version-getter` skill 获取，`updated_at` 必须获取系统当前真实时间。
+
 # {功能中文名}
 
 ## 概述
