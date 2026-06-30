@@ -1,8 +1,8 @@
 ---
 title: 活动参与
 updated_at: 2026-06-29 13:40:46
-version_fe: 1.9.4
-version_be: 1.9.4
+version_fe: 1.11.20260625
+version_be: 1.30
 ---
 
 # 活动参与

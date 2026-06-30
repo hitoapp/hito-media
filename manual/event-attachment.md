@@ -1,8 +1,8 @@
 ---
 title: 活动附件
 updated_at: 2026-06-29 13:38:18
-version_fe: v1.11.20260625
-version_be: v1.20.2606251
+version_fe: 1.11.20260625
+version_be: 1.30
 ---
 
 # 活动附件

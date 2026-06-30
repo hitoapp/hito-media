@@ -1,8 +1,8 @@
 ---
 title: 渠道码
 updated_at: 2026-06-29 13:11:55
-version_fe: 0.1.0
-version_be: 0.1.0
+version_fe: 1.11.20260625
+version_be: 1.30
 ---
 
 # 渠道码

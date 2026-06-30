@@ -14,11 +14,11 @@ description: 适用于喜多前后端版本号获取。
 执行以下命令获取前后端版本号：
 
 ```sh
-bash .agents/skills/hito-codebase-reader/get-version fe
+bash .agents/skills/hito-version-getter/get-version fe
 ```
 
 ### 后端版本号读取
 
 ```sh
-bash .agents/skills/hito-codebase-reader/get-version be
+bash .agents/skills/hito-version-getter/get-version be
 ```

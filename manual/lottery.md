@@ -1,8 +1,8 @@
 ---
 title: 现场抽奖
 updated_at: 2026-06-29 13:52:59
-version_fe: 0.1.0
-version_be: -
+version_fe: 1.11.20260625
+version_be: 1.30
 ---
 
 # 现场抽奖

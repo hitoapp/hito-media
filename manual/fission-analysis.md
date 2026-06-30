@@ -1,8 +1,8 @@
 ---
 title: 裂变分析
 updated_at: 2026-06-29 13:56:07
-version_fe: 0.1.0
-version_be: -
+version_fe: 1.11.20260625
+version_be: 1.30
 ---
 
 # 裂变分析
