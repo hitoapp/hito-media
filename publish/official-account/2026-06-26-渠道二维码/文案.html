@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>渠道码票根设计稿</title>
+  <style>
+    :root {
+      --blue: #3478f6;
+      --blue-deep: #2563eb;
+      --blue-light: #e8f0fe;
+      --blue-pale: #f0f5ff;
+      --ink: #1a1d23;
+      --muted: #6b7280;
+      --outside-bg: #eef1f6;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 28px 18px;
+      background: linear-gradient(145deg, #f0f2f7 0%, #e4e7ee 100%);
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    }
+
+    .stage {
+      width: min(100%, 980px);
+      display: grid;
+      grid-template-columns: minmax(0, 420px) minmax(280px, 1fr);
+      gap: 30px;
+      align-items: center;
+    }
+
+    /* ========== 主票根 ========== */
+    .ticket {
+      position: relative;
+      width: 390px;
+      max-width: 100%;
+      min-height: 700px;
+      margin: 0 auto;
+      overflow: hidden;
+      border-radius: 28px;
+      display: flex;
+      flex-direction: column;
+      background: linear-gradient(180deg, #f6f9ff 0%, #ffffff 30%, #ffffff 70%, #f0f5ff 100%);
+      box-shadow:
+        0 24px 56px rgba(30, 60, 100, 0.13),
+        0 1px 0 rgba(255, 255, 255, 0.9) inset;
+    }
+
+    /* 左上角圆点矩阵装饰 */
+    .deco-dots {
+      position: absolute;
+      top: 28px;
+      left: 28px;
+      z-index: 2;
+      display: grid;
+      grid-template-columns: repeat(3, 10px);
+      gap: 8px;
+      pointer-events: none;
+    }
+    .deco-dots span {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--blue);
+      opacity: 0.55;
+    }
+
+    .ticket-main {
+      position: relative;
+      z-index: 1;
+      flex: 1;
+      padding: 72px 34px 0;
+    }
+
+    /* 二维码占位 + 弧形光晕 */
+    .qr-area {
+      position: relative;
+      width: 220px;
+      height: 220px;
+      margin: 0 auto 28px;
+    }
+
+    .qr-swoosh {
+      position: absolute;
+      inset: -18px;
+      border-radius: 50%;
+      border: 38px solid transparent;
+      border-top-color: rgba(52, 120, 246, 0.18);
+      border-right-color: rgba(52, 120, 246, 0.12);
+      transform: rotate(-25deg);
+      pointer-events: none;
+    }
+
+    .qr-circle {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background:
+        radial-gradient(circle at 38% 32%, rgba(255,255,255,0.92), transparent 40%),
+        linear-gradient(155deg, #eef0f4 0%, #d8dce4 100%);
+      box-shadow:
+        0 0 0 10px rgba(255, 255, 255, 0.82),
+        0 18px 36px rgba(40, 60, 90, 0.09);
+    }
+
+    .title-block {
+      padding-top: 4px;
+    }
+
+    .event-title {
+      margin: 0;
+      font-size: 24px;
+      line-height: 1.35;
+      font-weight: 800;
+      letter-spacing: 0;
+    }
+
+    .info-panel {
+      margin-top: 22px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .info-row {
+      display: grid;
+      grid-template-columns: 26px minmax(0, 1fr);
+      gap: 10px;
+      align-items: start;
+      color: #3a3f48;
+      font-size: 15px;
+      line-height: 1.55;
+      font-weight: 400;
+    }
+
+    .info-icon {
+      width: 24px;
+      height: 24px;
+      margin-top: 2px;
+      display: grid;
+      place-items: center;
+    }
+    .info-icon svg {
+      width: 20px;
+      height: 20px;
+      fill: var(--blue);
+      stroke: none;
+    }
+
+    /* 底部蓝色波浪 footer */
+    .footer {
+      position: relative;
+      z-index: 1;
+      min-height: 80px;
+      margin-top: auto;
+      padding: 0 30px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: linear-gradient(135deg, #5a9cf8 0%, #3478f6 40%, #2563eb 100%);
+      color: #fff;
+    }
+
+    .footer-wave {
+      position: absolute;
+      top: -38px;
+      left: 0;
+      right: 0;
+      height: 40px;
+      overflow: hidden;
+      pointer-events: none;
+    }
+    .footer-wave svg {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    .channel {
+      max-width: 196px;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      font-size: 15px;
+      font-weight: 400;
+      opacity: 0.92;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+    }
+    .brand-logo {
+      width: 110px;
+      height: 34px;
+      display: block;
+      object-fit: contain;
+      filter: brightness(0) invert(1);
+    }
+
+    /* ========== 右侧说明 ========== */
+    .notes {
+      padding: 6px 0;
+    }
+    .notes h1 {
+      margin: 0 0 14px;
+      font-size: 28px;
+      line-height: 1.25;
+    }
+    .notes p {
+      margin: 0 0 14px;
+      color: #5f6570;
+      font-size: 15px;
+      line-height: 1.8;
+    }
+
+    /* ========== 缩略参考 ========== */
+    .small-preview {
+      width: 230px;
+      min-height: 400px;
+      margin-top: 22px;
+      overflow: hidden;
+      border-radius: 18px;
+      display: flex;
+      flex-direction: column;
+      background: linear-gradient(180deg, #f6f9ff 0%, #fff 36%, #fff 72%, #f0f5ff 100%);
+      box-shadow: 0 12px 28px rgba(30, 60, 100, 0.1);
+    }
+    .small-preview .deco-dots {
+      top: 16px;
+      left: 16px;
+      grid-template-columns: repeat(3, 7px);
+      gap: 5px;
+    }
+    .small-preview .deco-dots span {
+      width: 7px;
+      height: 7px;
+    }
+    .small-preview .ticket-main {
+      padding: 44px 20px 0;
+    }
+    .small-preview .qr-area {
+      width: 118px;
+      height: 118px;
+      margin-bottom: 16px;
+    }
+    .small-preview .qr-swoosh {
+      inset: -10px;
+      border-width: 22px;
+    }
+    .small-preview .qr-circle {
+      box-shadow:
+        0 0 0 6px rgba(255, 255, 255, 0.82),
+        0 10px 20px rgba(40, 60, 90, 0.07);
+    }
+    .small-preview .event-title {
+      font-size: 15px;
+      line-height: 1.3;
+    }
+    .small-preview .info-panel {
+      margin-top: 14px;
+      gap: 8px;
+    }
+    .small-preview .info-row {
+      grid-template-columns: 18px 1fr;
+      gap: 7px;
+      font-size: 11px;
+      line-height: 1.45;
+    }
+    .small-preview .info-icon {
+      width: 18px;
+      height: 18px;
+      margin-top: 1px;
+    }
+    .small-preview .info-icon svg {
+      width: 15px;
+      height: 15px;
+    }
+    .small-preview .footer {
+      min-height: 52px;
+      padding: 0 18px;
+    }
+    .small-preview .footer-wave {
+      top: -22px;
+      height: 24px;
+    }
+    .small-preview .channel {
+      max-width: 108px;
+      font-size: 11px;
+    }
+    .small-preview .brand-logo {
+      width: 72px;
+      height: 22px;
+    }
+
+    @media (max-width: 820px) {
+      body {
+        align-items: flex-start;
+        padding: 18px;
+      }
+      .stage {
+        grid-template-columns: 1fr;
+        gap: 22px;
+      }
+      .notes { order: -1; }
+      .notes h1 { font-size: 22px; }
+      .small-preview { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <main class="stage">
+    <section class="ticket" aria-label="渠道码票根主设计稿">
+      <div class="deco-dots" aria-hidden="true">
+        <span></span><span></span><span></span>
+        <span></span><span></span><span></span>
+        <span></span><span></span><span></span>
+      </div>
+
+      <div class="ticket-main">
+        <div class="qr-area">
+          <div class="qr-swoosh"></div>
+          <div class="qr-circle" aria-label="圆形二维码灰色占位"></div>
+        </div>
+
+        <div class="title-block">
+          <h2 class="event-title">关于人工智能在教育领域应用的调查问卷</h2>
+        </div>
+
+        <div class="info-panel">
+          <div class="info-row">
+            <span class="info-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 18a8 8 0 1 1 0-16 8 8 0 0 1 0 16zm.5-13H11v6l5.2 3.2.8-1.3-4.5-2.7V7z"/></svg>
+            </span>
+            <span>4.25(周五) 17:30<br>4.26(周六) 17:30</span>
+          </div>
+          <div class="info-row">
+            <span class="info-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5z"/></svg>
+            </span>
+            <span>电子科技大学 清水河校区<br>学生活动中心 204 室</span>
+          </div>
+        </div>
+      </div>
+
+      <footer class="footer">
+        <div class="footer-wave">
+          <svg viewBox="0 0 390 40" preserveAspectRatio="none">
+            <path d="M0 40 Q60 0, 130 18 T260 10 T390 28 L390 40Z" fill="#5a9cf8"/>
+            <path d="M0 40 Q80 8, 160 22 T300 14 T390 32 L390 40Z" fill="#3478f6"/>
+          </svg>
+        </div>
+        <div class="channel">微信群 33</div>
+        <div class="brand">
+          <img class="brand-logo" src="生成配图/hito-head-logo.png" alt="喜多 hito">
+        </div>
+      </footer>
+    </section>
+
+    <aside class="notes">
+      <h1>渠道码票根设计稿</h1>
+      <p>蓝色主题票根：左上角圆点矩阵装饰，灰色圆形二维码占位带蓝色弧形光晕，底部蓝色波浪渐变 footer，白色文字和反白 logo。</p>
+      <p>支持多行时间/地点，标题自动换行，整体比例纵向拉高，适合长内容场景。</p>
+
+      <section class="small-preview" aria-label="缩略参考">
+        <div class="deco-dots" aria-hidden="true">
+          <span></span><span></span><span></span>
+          <span></span><span></span><span></span>
+          <span></span><span></span><span></span>
+        </div>
+        <div class="ticket-main">
+          <div class="qr-area">
+            <div class="qr-swoosh"></div>
+            <div class="qr-circle" aria-label="圆形二维码灰色占位"></div>
+          </div>
+          <h2 class="event-title">明势讲堂·洞见：医疗 AI 前沿产业实践明势讲...</h2>
+          <div class="info-panel">
+            <div class="info-row">
+              <span class="info-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 18a8 8 0 1 1 0-16 8 8 0 0 1 0 16zm.5-13H11v6l5.2 3.2.8-1.3-4.5-2.7V7z"/></svg>
+              </span>
+              <span>4.25(周五) 17:30~18:00</span>
+            </div>
+            <div class="info-row">
+              <span class="info-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5z"/></svg>
+              </span>
+              <span>电子科技大学 清水河校区</span>
+            </div>
+          </div>
+        </div>
+        <footer class="footer">
+          <div class="footer-wave">
+            <svg viewBox="0 0 230 24" preserveAspectRatio="none">
+              <path d="M0 24 Q40 0, 80 12 T160 8 T230 18 L230 24Z" fill="#5a9cf8"/>
+              <path d="M0 24 Q50 4, 100 14 T190 10 T230 20 L230 24Z" fill="#3478f6"/>
+            </svg>
+          </div>
+          <div class="channel">西南大区十一群</div>
+          <div class="brand">
+            <img class="brand-logo" src="生成配图/hito-head-logo.png" alt="喜多 hito">
+          </div>
+        </footer>
+      </section>
+    </aside>
+  </main>
+</body>
+</html>
